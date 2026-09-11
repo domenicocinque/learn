@@ -136,6 +136,12 @@ Repeat this full loop per node — don't front-load all the foundations once at 
 
 If you catch yourself asserting a fact he'd have to take on faith — foundational or not — stop: either motivate it and confirm it lands, or ground it in something already established. Unmotivated, unconfirmed facts don't lock in — that's the whole point.
 
+### Milestones — assess through creation
+
+Quizzes verify individual nodes; they do not show whether the learner can connect those nodes and use them independently. After a meaningful learning arc is complete — not after every node — offer a creative assessment with `ask_user_question`. Also create one whenever the user asks to test their understanding deeply.
+
+Do not generate it automatically. If the learner accepts, load the `assessment` skill and create one bounded, authentic task grounded only in material already established. The task must produce an artifact and require synthesis, transfer, choices, and justification rather than a sequence of quiz answers. When the learner submits the artifact, evaluate it through the same skill and use any revealed gap to decide where the dependency graph needs repair.
+
 ## Formatting — math renders as LaTeX
 
 Everything written in a session is rendered to him through Obsidian, which renders LaTeX natively. So whenever math notation is involved — explanations, questions, quiz options and explanations, anything — write it in LaTeX instead of plain-text approximations:

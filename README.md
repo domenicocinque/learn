@@ -10,9 +10,11 @@ This is a personal system I built for myself, shared as-is. Built as a pi config
 
 - `skills/teach/` — the philosophy and the process
 - `skills/visualize/` — adds a correct, minimal diagram to a lesson when an idea is clearer as a picture
-- `extensions/ask-user-question/` — the agent asks you questions through a UI popup
-- `extensions/quiz/` — graded questions with instant feedback (✓/✗, correct answer, explanation)
-- `extensions/md-log/` — link a markdown file to the session
+- `skills/flashcards/` — distills a lesson into an Obsidian Spaced Repetition note
+- `skills/assessment/` — tests understanding through a creative, artifact-producing task
+- `extensions/ask-user-question.ts` — the agent asks you questions through a UI popup
+- `extensions/quiz.ts` — graded questions with instant feedback (✓/✗, correct answer, explanation)
+- `extensions/md-log.ts` — creates or links a markdown lesson and mirrors the session into it
 - `extensions/visual-tools/` — tools for visualization subagents
 - `agents/` — `researcher`, `svg-maker`, `mermaid-maker`: the subagents the system delegates to
 
@@ -25,6 +27,36 @@ git clone https://github.com/amosblomqvist/learn .pi
 ```
 
 Then open pi in that directory. (Or copy the pieces you want into your existing project config.)
+
+## Workflow
+
+Start a lesson with one command:
+
+```text
+/lesson learning stochastic processes
+```
+
+This creates `learning stochastic processes.md`, links the live transcript, and names the Pi session. Then tell Pi what you want to learn.
+
+Resume later with `/resume` inside Pi or `pi -r` at startup and select the named lesson. The markdown link is restored with the session; do not put session IDs in lesson files. Pi automatically compacts long contexts while preserving the full session history.
+
+Create retrieval-practice cards from the lesson:
+
+```text
+/skill:flashcards learning stochastic processes.md
+```
+
+This writes an Obsidian Markdown deck under `flashcards/`, using the Spaced Repetition plugin's question-and-answer format and native Obsidian math.
+
+After a meaningful learning arc, the teacher offers a creative assessment. You can also request one directly:
+
+```text
+/skill:assessment learning stochastic processes.md
+```
+
+The assessment is written under `assessments/` and asks you to create an artifact that demonstrates synthesis and transfer. Submit the completed artifact to the same skill for evaluation.
+
+Use `/md-log <filepath>` when you only want to link an existing empty note, and `/md-unlog` to stop logging.
 
 ## Requirements
 
