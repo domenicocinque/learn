@@ -18,6 +18,7 @@
  * explanation (the user reads this file live).
  *
  * Commands:
+ *   /lesson <name|path> — Create, link, and name a new lesson.
  *   /md-log <filepath>  — Link a markdown file and backfill the session.
  *   /md-unlog           — Stop logging.
  *
@@ -278,6 +279,62 @@ export default function mdLog(pi: ExtensionAPI) {
 
 	// --- Commands ---
 
+	function linkFile(resolved: string, ctx: any): number {
+		logFile = resolved;
+		pi.appendEntry("md-log", { file: resolved });
+		const written = backfill(ctx);
+		const theme = ctx.ui.theme;
+		ctx.ui.setStatus(
+			"md-log",
+			theme.fg("accent", "🗒 ") + theme.fg("dim", path.basename(resolved)),
+		);
+		return written;
+	}
+
+	pi.registerCommand("lesson", {
+		description: "Create and link a markdown lesson",
+		handler: async (args, ctx: any) => {
+			let filepath = args.trim();
+			if (!filepath) {
+				ctx.ui.notify("Usage: /lesson <name or filepath>", "warning");
+				return;
+			}
+			if (typeof ctx.isIdle === "function" && !ctx.isIdle()) {
+				ctx.ui.notify("Wait for the agent to finish before creating a lesson.", "warning");
+				return;
+			}
+			if (!filepath.toLowerCase().endsWith(".md")) filepath += ".md";
+
+			const resolved = path.isAbsolute(filepath) ? filepath : path.resolve(ctx.cwd, filepath);
+			if (resolved === logFile) {
+				ctx.ui.notify(`Already linked: ${resolved}`, "info");
+				return;
+			}
+			if (fs.existsSync(resolved)) {
+				if (!fs.statSync(resolved).isFile()) {
+					ctx.ui.notify(`Not a file: ${resolved}`, "error");
+					return;
+				}
+				if (fs.readFileSync(resolved, "utf-8").trim()) {
+					ctx.ui.notify("Lesson already exists. Resume its named session with /resume.", "error");
+					return;
+				}
+			} else {
+				const parent = path.dirname(resolved);
+				if (!fs.existsSync(parent)) {
+					ctx.ui.notify(`Parent directory does not exist: ${parent}`, "error");
+					return;
+				}
+				fs.writeFileSync(resolved, "", { encoding: "utf-8", flag: "wx" });
+			}
+
+			const title = path.basename(resolved, path.extname(resolved));
+			const written = linkFile(resolved, ctx);
+			pi.setSessionName(`Lesson — ${title}`);
+			ctx.ui.notify(`Created lesson: ${resolved} (${written} entries backfilled)`, "success");
+		},
+	});
+
 	pi.registerCommand("md-log", {
 		description: "Mirror the session to a markdown file (backfills history)",
 		handler: async (args, ctx: any) => {
@@ -305,17 +362,7 @@ export default function mdLog(pi: ExtensionAPI) {
 				return;
 			}
 
-			logFile = resolved;
-			pi.appendEntry("md-log", { file: resolved });
-
-			// Backfill the active branch.
-			const written = backfill(ctx);
-
-			const theme = ctx.ui.theme;
-			ctx.ui.setStatus(
-				"md-log",
-				theme.fg("accent", "🗒 ") + theme.fg("dim", path.basename(resolved)),
-			);
+			const written = linkFile(resolved, ctx);
 			ctx.ui.notify(`Linked: ${resolved} (${written} entries backfilled)`, "success");
 		},
 	});
